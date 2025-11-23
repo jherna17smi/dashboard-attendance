@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shift Tracker Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #d0ebff; /* light blue background */
+    }
+    .banner {
+      background-color: #007bff;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+    }
+    .result-banner {
+      background-color: moccasin;
+      color: #000;
+      padding: 10px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .congrats-img {
+      width: 100%;
+      max-width: 300px;
+      display: none;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">Shift Tracker Dashboard</div>
+
+  <div class="container mt-4">
+    <form id="shiftForm">
+      <div class="row mb-3">
+        <div class="col">
+          <label for="employees" class="form-label">Employees on Shift</label>
+          <input type="number" class="form-control" id="employees" required>
+        </div>
+        <div class="col">
+          <label for="tasks" class="form-label">Total Tasks</label>
+          <input type="number" class="form-control" id="tasks" required>
+        </div>
+        <div class="col">
+          <label for="employeesPerTask" class="form-label">Employees per Task</label>
+          <input type="number" class="form-control" id="employeesPerTask" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="leads" class="form-label">Process Assistance Leads (comma-separated)</label>
+        <input type="text" class="form-control" id="leads" placeholder="e.g., Alice, Bob, Charlie" required>
+      </div>
+
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Process Lead</th>
+            <th colspan="7">Team Members</th>
+          </tr>
+        </thead>
+        <tbody id="leadTable">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+
+      <div class="mb-3">
+        <label for="employeesPerLead" class="form-label">Employees needed per Lead</label>
+        <input type="number" class="form-control" id="employeesPerLead" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Calculate</button>
+    </form>
+
+    <div id="result" class="result-banner mt-4"></div>
+    <img id="congratsImg" class="congrats-img" src="https://media.giphy.com/media/xUPGcguWZHRC2HyBRS/giphy.gif" alt="Congratulations">
+  </div>
+
+  <script>
+    document.getElementById('leads').addEventListener('change', function () {
+      const leads = this.value.split(',').map(name => name.trim());
+      const tbody = document.getElementById('leadTable');
+      tbody.innerHTML = '';
+      leads.forEach(lead => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${lead}</td>` + '<td><input type="text" class="form-control" /></td>'.repeat(7);
+        tbody.appendChild(row);
+      });
+    });
+
+    document.getElementById('shiftForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const employees = +document.getElementById('employees').value;
+      const tasks = +document.getElementById('tasks').value;
+      const employeesPerTask = +document.getElementById('employeesPerTask').value;
+      const employeesPerLead = +document.getElementById('employeesPerLead').value;
+      const totalNeeded = tasks * employeesPerTask;
+
+      const leads = document.getElementById('leads').value.split(',').map(l => l.trim()).filter(Boolean);
+      const totalNeededByLeads = leads.length * employeesPerLead;
+
+      let message = `Total Employees: ${employees}<br>Total Needed for Tasks: ${totalNeeded}<br>`;
+      message += `Employees Needed per Lead: ${employeesPerLead}<br>Total Needed by ${leads.length} Leads: ${totalNeededByLeads}<br>`;
+
+      if (employees >= totalNeeded && employees >= totalNeededByLeads) {
+        message += '✅ All shift tasks can be completed on time.';
+        document.getElementById('congratsImg').style.display = 'block';
+      } else {
+        message += '⚠️ Not enough employees to complete all tasks by 3:30pm.';
+        document.getElementById('congratsImg').style.display = 'none';
+      }
+
+      document.getElementById('result').innerHTML = message;
+    });
+  </script>
+</body>
+</html>
